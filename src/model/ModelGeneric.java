@@ -6,7 +6,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
-import uteis.SyntaxConverter;
+
+import utils.SyntaxConverter;
 
 public class ModelGeneric {
 
@@ -20,12 +21,12 @@ public class ModelGeneric {
 		return newString;
 	}
 
-	public ArrayList<String> getNameTables() {
+	public ArrayList<String> getNameFields() {
 		Field[] fields = this.getClass().getDeclaredFields();
 		ArrayList<String> listName = new ArrayList<String>();
 
 		for (Field field : fields) {
-			listName.add(field.getName());
+			listName.add( field.getName());
 		}
 		return listName;
 
@@ -35,13 +36,13 @@ public class ModelGeneric {
 		Set<String> keys = hashNameAttributeAndValue.keySet();
 		for (String key : keys) {
 			Object valueObject = hashNameAttributeAndValue.get(key);
-			Field attribute = getMethodByName(key);
-			String nameAttribute = "set" + SyntaxConverter.firstCapitalLetter(attribute.getName());
-			setValueByNameMethod(nameAttribute, attribute.getType(), valueObject);
+			Field attribute = getAttributedByName(key);
+			String nameMethod = "set" + SyntaxConverter.firstCapitalLetter(attribute.getName());
+			setValueByNameMethod(nameMethod, attribute.getType(), valueObject);
 		}
 	}
 
-	private Field getMethodByName(String name) {
+	private Field getAttributedByName(String name) {
 		Field field = null;
 		try {
 			field = this.getClass().getField(name);

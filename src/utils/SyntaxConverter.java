@@ -1,4 +1,4 @@
-package uteis;
+package utils;
 
 public class SyntaxConverter {
 	public static String lowercaseAndUnderline(String classNameSon) {
