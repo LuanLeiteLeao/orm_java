@@ -5,16 +5,21 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-
 import model.ModelGeneric;
-import utils.SyntaxConverter;
+import model.PrimaryKey;
 
 public class Prepare {
-	public String fieldsNamesForSelection(ModelGeneric model) {
+	public String fieldsNames(ModelGeneric model, Boolean isInsertData) {
 		ArrayList<String> listFildName = model.getNameFields();
+		PrimaryKey pk = model.getPrimaryKey();
 		String fieldsNamesForSelection = "";
+
+		if (pk != null && !isInsertData) {
+			fieldsNamesForSelection = model.getPrimaryKey().getFieldName() + ",";
+		}
+
 		for (String fildName : listFildName) {
-			fieldsNamesForSelection += SyntaxConverter.lowercaseAndUnderline(fildName) + ",";
+			fieldsNamesForSelection += model.getObjectNameByFieldNameTable(fildName) + ",";
 		}
 //		remove o ultimo campo pois sobra um ","
 		fieldsNamesForSelection = fieldsNamesForSelection.substring(0, fieldsNamesForSelection.length() - 1);
@@ -27,9 +32,30 @@ public class Prepare {
 		ArrayList<String> listNameFilds = model.getNameFields();
 		Hashtable<String, Object> hash = new Hashtable<String, Object>();
 		for (String NameFild : listNameFilds) {
-			Object object = rs.getObject(SyntaxConverter.lowercaseAndUnderline(NameFild));
+			Object object = rs.getObject(model.getObjectNameByFieldNameTable(NameFild));
 			hash.put(NameFild, object);
 		}
+		if (model.getPrimaryKey() != null) {
+			Object object = rs.getObject(model.getPrimaryKey().getFieldName());
+			hash.put(model.getPrimaryKey().getObjectName(), object);
+		}
 		return hash;
+	}
+
+	public String prepararCamposParaStament(ModelGeneric tabela) {
+		List<String> campos = new ArrayList();
+		List<String> listcampos = tabela.getNameFields();
+
+		campos.add("(");
+
+		for (String string : listcampos) {
+			campos.add("?");
+			campos.add(",");
+		}
+
+		campos.remove(campos.size() - 1);
+		campos.add(")");
+
+		return String.join("", campos);
 	}
 }

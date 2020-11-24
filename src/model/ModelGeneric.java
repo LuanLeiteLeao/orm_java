@@ -9,7 +9,22 @@ import java.util.Set;
 
 import utils.SyntaxConverter;
 
-public class ModelGeneric {
+public abstract class ModelGeneric {
+	public abstract PrimaryKey getPrimaryKey();
+
+	protected abstract Hashtable<String, String> objectNameAndFieldNameTable();
+
+	public String getObjectNameByFieldNameTable(String key) {
+		return objectNameAndFieldNameTable().get(key);
+	}
+
+	public Object getPkValue() {
+		String nameMethod = "get" + SyntaxConverter.firstCapitalLetter(getPrimaryKey().getObjectName());
+		System.out.println(nameMethod);
+		Object PkValue = setValueByNameMethod(nameMethod, null, null);
+
+		return PkValue;
+	}
 
 	public String getNameTable() {
 //		pega o nome da classe filha 
@@ -22,13 +37,14 @@ public class ModelGeneric {
 	}
 
 	public ArrayList<String> getNameFields() {
-		Field[] fields = this.getClass().getDeclaredFields();
-		ArrayList<String> listName = new ArrayList<String>();
+		Set<String> fieldsName = objectNameAndFieldNameTable().keySet();
+		ArrayList<String> fieldsNameList = new ArrayList<String>();
 
-		for (Field field : fields) {
-			listName.add( field.getName());
+		for (String string : fieldsName) {
+			fieldsNameList.add(string);
 		}
-		return listName;
+
+		return fieldsNameList;
 
 	}
 
@@ -40,6 +56,19 @@ public class ModelGeneric {
 			String nameMethod = "set" + SyntaxConverter.firstCapitalLetter(attribute.getName());
 			setValueByNameMethod(nameMethod, attribute.getType(), valueObject);
 		}
+	}
+
+	public ArrayList<Object> getFieldsTables() {
+		Set<String> keys = objectNameAndFieldNameTable().keySet();
+		ArrayList<Object> listValues = new ArrayList<Object>();
+		for (String key : keys) {
+			Object valueObject = objectNameAndFieldNameTable().get(key);
+			Field attribute = getAttributedByName(key);
+			String nameMethod = "get" + SyntaxConverter.firstCapitalLetter(this.getObjectNameByFieldNameTable(key));
+			Object value = setValueByNameMethod(nameMethod, attribute.getType(), null);
+			listValues.add(value);
+		}
+		return listValues;
 	}
 
 	private Field getAttributedByName(String name) {
@@ -58,10 +87,15 @@ public class ModelGeneric {
 		return field;
 	}
 
-	private void setValueByNameMethod(String nameMethod, Class<?> typeObject, Object valueObject) {
+	private Object setValueByNameMethod(String nameMethod, Class<?> typeObject, Object valueObject) {
 		Method method = null;
+		Object objeto = null;
 		try {
-			method = this.getClass().getDeclaredMethod(nameMethod, typeObject);
+			if (valueObject == null) {
+				method = this.getClass().getDeclaredMethod(nameMethod);
+			} else {
+				method = this.getClass().getDeclaredMethod(nameMethod, typeObject);
+			}
 
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
@@ -70,7 +104,13 @@ public class ModelGeneric {
 		}
 
 		try {
-			method.invoke(this, valueObject);
+			if (valueObject == null) {
+				objeto = method.invoke(this);
+			} else {
+				objeto = method.invoke(this, valueObject);
+			}
+
+			return objeto;
 		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -81,6 +121,7 @@ public class ModelGeneric {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return method;
 
 	}
 

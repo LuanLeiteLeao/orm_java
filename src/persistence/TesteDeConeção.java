@@ -1,8 +1,10 @@
 package persistence;
 
-import java.util.ArrayList;
 
-import model.MinhaCasaMinhaVida;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
 import model.ModelGeneric;
 import model.Plataformas;
 
@@ -11,14 +13,24 @@ public class TesteDeConeção {
 	DataBaseConnection con = DataBaseConnection.getIntancia();
 	DatabaseQuerys q = new DatabaseQuerys();
 	Plataformas minhaCasa = new Plataformas();
+	minhaCasa.getNameFields();
+//	
+//	ArrayList<Plataformas> a = (ArrayList<Plataformas>) q.listar(minhaCasa);
+//	for (Plataformas modelGeneric : a) {
+//	
+//		System.out.println(modelGeneric.getPlataformasId());
+//		System.out.println(modelGeneric.getNome());
+//		System.out.println(modelGeneric.getCriacao());
+//		System.out.println(modelGeneric.getModificacao());
+//	}
+
+	minhaCasa.setPlataformasId(90);
+	minhaCasa.setNome("Test");
+	minhaCasa.setCriacao(new Date());
+	minhaCasa.setModificacao(new Date());
+//	q.inserir(minhaCasa); 
+	q.remover(minhaCasa);
 	
-	ArrayList<ModelGeneric> a = q.listar(minhaCasa);
-	for (ModelGeneric modelGeneric : a) {
-		Plataformas p = (Plataformas) modelGeneric;
-		System.out.println(p.getPlataformasId());
-		System.out.println(p.getNome());
-		System.out.println(p.getCriacao());
-		System.out.println(p.getModificacao());
-	}
+	
 	}
 }

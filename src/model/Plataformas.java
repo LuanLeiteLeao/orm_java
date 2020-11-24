@@ -1,6 +1,7 @@
 package model;
 
-import java.sql.Date;
+import java.util.Date;
+import java.util.Hashtable;
 
 public class Plataformas extends ModelGeneric {
 	public Integer plataformasId;
@@ -39,5 +40,21 @@ public class Plataformas extends ModelGeneric {
 	public void setModificacao(Date modificacao) {
 		this.modificacao = modificacao;
 	}
+
+	@Override
+	protected Hashtable<String, String> objectNameAndFieldNameTable() {
+		Hashtable<String, String> hashtable = new Hashtable<String, String>();
+
+		hashtable.put("nome", "nome");
+		hashtable.put("criacao", "criacao");
+		hashtable.put("modificacao", "modificacao");
+		return hashtable;
+	}
+
+	@Override
+	public PrimaryKey getPrimaryKey() {
+		return new PrimaryKey("plataformas_id","plataformasId",false);
+	}
+
 
 }

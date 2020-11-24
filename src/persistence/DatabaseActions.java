@@ -1,12 +1,10 @@
 package persistence;
 
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
 import model.ModelGeneric;
@@ -69,4 +67,54 @@ public class DatabaseActions extends DataBaseConnection {
 		return modelList;
 
 	}
+
+	private void setarStatementCampoValor(PreparedStatement stmt, List<Object> listaDeCamposValores) {
+
+		int sizeList = listaDeCamposValores.size();
+
+		for (int i = 0; i < sizeList; i++) {
+			try {
+				stmt.setObject(i + 1, listaDeCamposValores.get(i));
+			} catch (SQLException e) {
+				e.printStackTrace();
+				System.out.println("Erro ao setar campos:\n\n\n" + e.getMessage());
+			}
+		}
+
+	}
+
+	public void insert(String sql, ModelGeneric model) {
+
+		try {
+			// prepared statement para inserção
+			PreparedStatement stmt = (PreparedStatement) this.con.prepareStatement(sql);
+
+			setarStatementCampoValor(stmt, model.getFieldsTables());
+
+			// executa
+			stmt.execute();
+
+			System.out.println("Salvo Com Sucesso");
+
+		} catch (SQLException e) {
+			System.out.println("Deu Ruim");
+			System.out.println(e.getMessage());
+
+		}
+
+	}
+
+	public void delete(String sql, ModelGeneric model) {
+
+		try {
+			PreparedStatement stmt = (PreparedStatement) this.con.prepareStatement(sql);
+			stmt.execute();
+			System.out.println("Deletado com sucesso");
+
+		} catch (SQLException e) {
+			System.out.println(e);
+			System.out.println("Deu Ruim");
+		}
+	}
+
 }
