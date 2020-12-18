@@ -21,9 +21,8 @@ public class SyntaxConverter {
 	public static String firstCapitalLetter(String string) {
 		char charCapitalLetter ;
 		charCapitalLetter = Character.toTitleCase(string.charAt(0));
-
 		String stringCapitalLetter = charCapitalLetter+string.substring(1);
-		System.out.println(stringCapitalLetter);
+		
 		return stringCapitalLetter;
 
 	}

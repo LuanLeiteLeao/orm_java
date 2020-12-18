@@ -1,8 +1,8 @@
 package persistence;
+
 import java.util.ArrayList;
 
 import model.ModelGeneric;
-
 
 public class DatabaseQuerys {
 	Prepare prepare = new Prepare();
@@ -24,18 +24,17 @@ public class DatabaseQuerys {
 	}
 
 	public void remover(ModelGeneric model) {
-		String sqlDelet = "delete from " + model.getNameTable() + " where " + model.getPrimaryKey().getFieldName() + " = "
-				+model.getPkValue() ;
+		String sqlDelet = "delete from " + model.getNameTable() + " where " + model.getPrimaryKey().getFieldName()
+				+ " = " + model.getPkValue();
 		System.out.println(sqlDelet);
 		actions.delete(sqlDelet, model);
-//		
-//		try {
-//			PreparedStatement stmt = (PreparedStatement) this.con.prepareStatement(sqlDelet);
-//			stmt.execute();
-//
-//		} catch (SQLException e) {
-//			System.out.println(e);
-//		}
+	}
+
+	public ModelGeneric getById(ModelGeneric model) {
+		String sqlSelect = "select " + prepare.fieldsNames(model, false) + " from " + model.getNameTable() + " where " + model.getPrimaryKey().getFieldName()
+				+ " = " + model.getPkValue();
+		
+		return actions.select(sqlSelect, model).get(0);
 	}
 
 }

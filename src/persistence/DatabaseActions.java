@@ -30,8 +30,6 @@ public class DatabaseActions extends DataBaseConnection {
 			// itera no ResultSet
 			int cont = 0;
 			while (rs.next()) {
-
-//					model.getClass().getDeclaredConstructor().newInstance();
 				ModelGeneric newInstance;
 				try {
 					newInstance = model.getClass().getDeclaredConstructor().newInstance();
@@ -89,7 +87,7 @@ public class DatabaseActions extends DataBaseConnection {
 			// prepared statement para inserção
 			PreparedStatement stmt = (PreparedStatement) this.con.prepareStatement(sql);
 
-			setarStatementCampoValor(stmt, model.getFieldsTables());
+			setarStatementCampoValor(stmt, model.getFieldsValue());
 
 			// executa
 			stmt.execute();
@@ -108,7 +106,7 @@ public class DatabaseActions extends DataBaseConnection {
 
 		try {
 			PreparedStatement stmt = (PreparedStatement) this.con.prepareStatement(sql);
-			stmt.execute();
+				stmt.execute();
 			System.out.println("Deletado com sucesso");
 
 		} catch (SQLException e) {

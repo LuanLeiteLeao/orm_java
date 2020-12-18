@@ -6,66 +6,97 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
-
+import model.DBField;
 import utils.SyntaxConverter;
 
 public abstract class ModelGeneric {
-	public abstract PrimaryKey getPrimaryKey();
 
-	protected abstract Hashtable<String, String> objectNameAndFieldNameTable();
+	public Object getPKValue() {
+		String nameField = getNameFieldPk();
+		Object objeto = null;
+		try {
+			Method method = this.getClass().getDeclaredMethod("get" + SyntaxConverter.firstCapitalLetter(nameField));
+			objeto = method.invoke(this);
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-	public String getObjectNameByFieldNameTable(String key) {
-		return objectNameAndFieldNameTable().get(key);
+		return objeto;
 	}
 
-	public Object getPkValue() {
-		String nameMethod = "get" + SyntaxConverter.firstCapitalLetter(getPrimaryKey().getObjectName());
-		System.out.println(nameMethod);
-		Object PkValue = setValueByNameMethod(nameMethod, null, null);
+	private String getNameFieldPk() {
+		for (Field field : this.getClass().getDeclaredFields()) {
+			if (field.isAnnotationPresent(DBField.class)) {
+				DBField anotacao = field.getAnnotation(DBField.class);
+				if (anotacao.isPrimaryKey()) {
+					return field.getName();
+				}
+			}
+		}
+		return null;
+	}
 
-		return PkValue;
+	public String getPKName() {
+		for (Field field : this.getClass().getDeclaredFields()) {
+			if (field.isAnnotationPresent(DBField.class)) {
+				DBField anotacao = field.getAnnotation(DBField.class);
+				return anotacao.colummn();
+			}
+		}
+		return null;
 	}
 
 	public String getNameTable() {
-//		pega o nome da classe filha 
-		String classNameSon = this.getClass().getSimpleName();
-//		trasforma a string  de JavaPadraoClasse para java_padrao_classe  
-//		este mesmo padrao tem queser usado na tabela do banco de dados se nao, nao funciona 
-		String newString = SyntaxConverter.lowercaseAndUnderline(classNameSon);
-
-		return newString;
-	}
-
-	public ArrayList<String> getNameFields() {
-		Set<String> fieldsName = objectNameAndFieldNameTable().keySet();
-		ArrayList<String> fieldsNameList = new ArrayList<String>();
-
-		for (String string : fieldsName) {
-			fieldsNameList.add(string);
+		String tabela = null;
+		// Tenta obter nossa anotação na classe
+		DBTable persistable = this.getClass().getAnnotation(DBTable.class);
+		// Se tiver a anotação...
+		if (persistable != null) {
+			tabela = persistable.table();
 		}
-
-		return fieldsNameList;
-
+		return tabela;
 	}
 
-	public void setFieldsTables(Hashtable<String, Object> hashNameAttributeAndValue) {
-		Set<String> keys = hashNameAttributeAndValue.keySet();
-		for (String key : keys) {
-			Object valueObject = hashNameAttributeAndValue.get(key);
-			Field attribute = getAttributedByName(key);
-			String nameMethod = "set" + SyntaxConverter.firstCapitalLetter(attribute.getName());
-			setValueByNameMethod(nameMethod, attribute.getType(), valueObject);
+	public ArrayList<String> getFieldsNameTable() {
+		ArrayList<String> namesFields = new ArrayList<String>();
+
+		for (Field field : this.getClass().getDeclaredFields()) {
+			if (field.isAnnotationPresent(DBField.class)) {
+				DBField anotacao = field.getAnnotation(DBField.class);
+				namesFields.add(anotacao.colummn());
+			}
+		}
+		return namesFields;
+	}
+
+	public ArrayList<String> getFieldsNameClass() {
+		ArrayList<String> namesFields = new ArrayList<String>();
+
+		for (Field field : this.getClass().getDeclaredFields()) {
+			namesFields.add(field.getName());
+		}
+		return namesFields;
+	}
+
+	public void setFieldsTables(ArrayList<Object> listObject) {
+		ArrayList<String> fieldsNames = this.getFieldsNameClass();
+		for (int i = 0; i < fieldsNames.size(); i++) {
+			Field type = getAttributedByName(fieldsNames.get(i));
+			String nameMethod = "set" + SyntaxConverter.firstCapitalLetter(fieldsNames.get(i));
+			Object valueObject = listObject.get(i);
+			setValueByNameMethod(nameMethod, type.getType(), valueObject);
 		}
 	}
 
-	public ArrayList<Object> getFieldsTables() {
-		Set<String> keys = objectNameAndFieldNameTable().keySet();
+	public ArrayList<Object> getFieldsValue() {
+		ArrayList<String> fieldsNames = this.getFieldsNameClass();
 		ArrayList<Object> listValues = new ArrayList<Object>();
-		for (String key : keys) {
-			Object valueObject = objectNameAndFieldNameTable().get(key);
-			Field attribute = getAttributedByName(key);
-			String nameMethod = "get" + SyntaxConverter.firstCapitalLetter(this.getObjectNameByFieldNameTable(key));
-			Object value = setValueByNameMethod(nameMethod, attribute.getType(), null);
+
+		for (String field : fieldsNames) {
+			String nameMethod = "get" + SyntaxConverter.firstCapitalLetter(field);
+			Object value = setValueByNameMethod(nameMethod, null, null);
 			listValues.add(value);
 		}
 		return listValues;
@@ -77,10 +108,7 @@ public abstract class ModelGeneric {
 			field = this.getClass().getField(name);
 			return field;
 
-		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
+		} catch (SecurityException | NoSuchFieldException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -97,9 +125,7 @@ public abstract class ModelGeneric {
 				method = this.getClass().getDeclaredMethod(nameMethod, typeObject);
 			}
 
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
+		} catch (SecurityException | NoSuchMethodException e) {
 			e.printStackTrace();
 		}
 
@@ -111,18 +137,11 @@ public abstract class ModelGeneric {
 			}
 
 			return objeto;
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
+		} catch (InvocationTargetException | IllegalArgumentException | IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return method;
-
 	}
 
 }

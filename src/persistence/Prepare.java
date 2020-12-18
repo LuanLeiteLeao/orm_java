@@ -10,7 +10,7 @@ import model.PrimaryKey;
 
 public class Prepare {
 	public String fieldsNames(ModelGeneric model, Boolean isInsertData) {
-		ArrayList<String> listFildName = model.getNameFields();
+		ArrayList<String> listFildName = model.getFieldsNameTable();
 		PrimaryKey pk = model.getPrimaryKey();
 		String fieldsNamesForSelection = "";
 
@@ -29,7 +29,7 @@ public class Prepare {
 
 	public Hashtable<String, Object> getCamposValores(ResultSet rs, ModelGeneric model) throws SQLException {
 		ArrayList<Object> list = new ArrayList<>();
-		ArrayList<String> listNameFilds = model.getNameFields();
+		ArrayList<String> listNameFilds = model.getFieldsNameTable();
 		Hashtable<String, Object> hash = new Hashtable<String, Object>();
 		for (String NameFild : listNameFilds) {
 			Object object = rs.getObject(model.getObjectNameByFieldNameTable(NameFild));
@@ -44,7 +44,7 @@ public class Prepare {
 
 	public String prepararCamposParaStament(ModelGeneric tabela) {
 		List<String> campos = new ArrayList();
-		List<String> listcampos = tabela.getNameFields();
+		List<String> listcampos = tabela.getFieldsNameTable();
 
 		campos.add("(");
 
